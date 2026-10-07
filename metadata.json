@@ -1,0 +1,6 @@
+{
+  "name": "Anomaly Management",
+  "description": "Enterprise ERP finance anomaly detection and period-close audit suite for transaction outliers, missing transactions, inventory risks, and custom rules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
