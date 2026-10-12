@@ -16,6 +16,9 @@ import {
   RotateCcw,
   CheckCircle2,
   MinusCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Trash2,
   Layers,
   ArrowRight,
 } from 'lucide-react';
@@ -216,30 +219,28 @@ export const TransactionAnomaliesTab: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* 2 KPI Cards Required by Prompt:
-          "Anomalies Pending Review" (Need Review + Reopen count) and
-          "Total Financial Impact" (sum of impacted amount of pending ones). Both update with filters. */}
+      {/* 2 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <KpiCard
           label="Anomalies Pending Review"
           value={pendingCount}
-          subValue={`of ${filteredList.length} filtered items`}
+          subValue={`of ${filteredList.length} surfaced items`}
           badge="Audit Pending"
-          badgeColor="amber"
-          icon={<AlertTriangle className="w-5 h-5 text-amber-600" />}
+          badgeColor="redwood"
+          icon={<AlertTriangle className="w-5 h-5 text-[#8d3c26]" />}
           description="Requires accountant review before period close"
         />
         <KpiCard
-          label="Total Financial Impact"
+          label="Total Financial Exposure"
           value={`$${totalFinancialImpact.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-          badge="Unresolved GL Exposure"
-          badgeColor="blue"
-          icon={<DollarSign className="w-5 h-5 text-blue-600" />}
-          description="Cumulative debit/credit value of pending anomalies"
+          badge="Unresolved GL Balance"
+          badgeColor="redwood"
+          icon={<DollarSign className="w-5 h-5 text-[#8d3c26]" />}
+          description="Cumulative financial exposure of pending anomalies"
         />
       </div>
 
-      {/* Top 9-Step Importance Slider Required by Prompt */}
+      {/* Top 9-Step Importance Slider */}
       <ImportanceSlider
         step={sliderStep}
         onChange={(newStep) => {
@@ -251,11 +252,11 @@ export const TransactionAnomaliesTab: React.FC = () => {
       />
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-2xs">
+      <div className="bg-white/95 border border-[#ebdcd3] rounded-2xl p-4.5 space-y-3.5 shadow-2xs">
         {/* Search Row & Toggles */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
               value={searchTerm}
@@ -264,12 +265,12 @@ export const TransactionAnomaliesTab: React.FC = () => {
                 setCurrentPage(1);
               }}
               placeholder="Search by transaction #, entity, or memo..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              className="w-full pl-9 pr-3.5 py-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-xs text-stone-800 placeholder-stone-400 focus:bg-white focus:ring-2 focus:ring-[#8d3c26] focus:border-transparent focus:outline-hidden transition-all"
             />
           </div>
 
-          <div className="flex items-center gap-4 self-end md:self-auto text-xs">
-            <label className="flex items-center gap-1.5 text-slate-700 cursor-pointer select-none">
+          <div className="flex items-center gap-5 self-end md:self-auto text-xs">
+            <label className="flex items-center gap-1.5 text-stone-700 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={bookmarkedOnly}
@@ -277,15 +278,15 @@ export const TransactionAnomaliesTab: React.FC = () => {
                   setBookmarkedOnly(e.target.checked);
                   setCurrentPage(1);
                 }}
-                className="rounded text-blue-600 focus:ring-blue-500"
+                className="rounded text-[#8d3c26] focus:ring-[#8d3c26]"
               />
               <span className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                <Star className="w-3.5 h-3.5 text-[#b25336] fill-current" />
                 Bookmarked only
               </span>
             </label>
 
-            <label className="flex items-center gap-1.5 text-slate-700 cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 text-stone-700 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={withMemoOnly}
@@ -293,7 +294,7 @@ export const TransactionAnomaliesTab: React.FC = () => {
                   setWithMemoOnly(e.target.checked);
                   setCurrentPage(1);
                 }}
-                className="rounded text-blue-600 focus:ring-blue-500"
+                className="rounded text-[#8d3c26] focus:ring-[#8d3c26]"
               />
               <span>With memo</span>
             </label>
@@ -301,16 +302,16 @@ export const TransactionAnomaliesTab: React.FC = () => {
         </div>
 
         {/* Filter Dropdowns Grid: Transaction Type, Anomaly Type, Account, Accounting Period, Entity, Status, Subsidiary */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5 text-xs">
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Tran Type</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Tran Type</label>
             <select
               value={filterTxType}
               onChange={(e) => {
                 setFilterTxType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
             >
               <option value="All">All Types</option>
               {TRANSACTION_TYPES.map((t) => (
@@ -320,14 +321,14 @@ export const TransactionAnomaliesTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Anomaly Type</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Anomaly Type</label>
             <select
               value={filterAnomalyType}
               onChange={(e) => {
                 setFilterAnomalyType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
             >
               <option value="All">All Anomalies</option>
               <option value="Unusual Account">Unusual Account</option>
@@ -339,14 +340,14 @@ export const TransactionAnomaliesTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Account</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Account</label>
             <select
               value={filterAccount}
               onChange={(e) => {
                 setFilterAccount(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 truncate"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26] truncate"
             >
               <option value="All">All Accounts</option>
               {uniqueAccounts.map((acc) => (
@@ -356,14 +357,14 @@ export const TransactionAnomaliesTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Period</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Period</label>
             <select
               value={filterPeriod}
               onChange={(e) => {
                 setFilterPeriod(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
             >
               <option value="All">All Periods</option>
               {ACCOUNTING_PERIODS.map((p) => (
@@ -373,14 +374,14 @@ export const TransactionAnomaliesTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Entity</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Entity</label>
             <select
               value={filterEntity}
               onChange={(e) => {
                 setFilterEntity(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 truncate"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26] truncate"
             >
               <option value="All">All Entities</option>
               {uniqueEntities.map((ent) => (
@@ -390,14 +391,14 @@ export const TransactionAnomaliesTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Status</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Status</label>
             <select
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
             >
               <option value="All">All Statuses</option>
               <option value="Need Review">Need Review</option>
@@ -407,14 +408,14 @@ export const TransactionAnomaliesTab: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Subsidiary</label>
+            <label className="text-[10px] uppercase font-semibold text-stone-400 block mb-1">Subsidiary</label>
             <select
               value={filterSubsidiary}
               onChange={(e) => {
                 setFilterSubsidiary(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 truncate"
+              className="w-full p-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-stone-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26] truncate"
             >
               <option value="All">All Subsidiaries</option>
               {SUBSIDIARIES.map((sub) => (
@@ -426,8 +427,8 @@ export const TransactionAnomaliesTab: React.FC = () => {
 
         {/* Bulk Actions Floating/Bar */}
         {selectedIds.length > 0 && (
-          <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 bg-blue-50/70 p-2.5 rounded-lg text-xs">
-            <span className="font-semibold text-blue-900">
+          <div className="pt-2.5 border-t border-[#f0dfd5] flex flex-wrap items-center justify-between gap-2.5 bg-[#fbf3ef] p-3 rounded-xl text-xs">
+            <span className="font-semibold text-[#732918]">
               {selectedIds.length} anomalies selected
             </span>
             <div className="flex items-center gap-2">
@@ -437,9 +438,9 @@ export const TransactionAnomaliesTab: React.FC = () => {
                   bulkUpdateStatus('transaction', selectedIds, 'resolve');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-md font-semibold hover:bg-emerald-700 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-700 text-white rounded-lg font-semibold hover:bg-emerald-800 transition-colors shadow-2xs"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <ThumbsUp className="w-3.5 h-3.5" />
                 Mark Resolved
               </button>
               <button
@@ -448,10 +449,21 @@ export const TransactionAnomaliesTab: React.FC = () => {
                   bulkUpdateStatus('transaction', selectedIds, 'no-action');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-md font-semibold hover:bg-slate-100 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#ebdcd3] text-stone-700 rounded-lg font-semibold hover:bg-stone-50 transition-colors shadow-2xs"
               >
-                <MinusCircle className="w-3.5 h-3.5 text-slate-500" />
-                No Action Needed
+                <ThumbsDown className="w-3.5 h-3.5 text-stone-500" />
+                Not an Error
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  bulkUpdateStatus('transaction', selectedIds, 'discard');
+                  setSelectedIds([]);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg font-semibold hover:bg-rose-100 transition-colors shadow-2xs"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                Remove Exceptions
               </button>
               <button
                 type="button"
@@ -459,7 +471,7 @@ export const TransactionAnomaliesTab: React.FC = () => {
                   bulkUpdateStatus('transaction', selectedIds, 'reopen');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#8d3c26] text-white rounded-lg font-semibold hover:bg-[#732918] transition-colors shadow-2xs"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reopen
@@ -470,11 +482,11 @@ export const TransactionAnomaliesTab: React.FC = () => {
       </div>
 
       {/* Anomaly Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+      <div className="bg-white/95 border border-[#ebdcd3] rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-semibold">
+              <tr className="bg-[#fcf9f6] border-b border-[#ebdcd3] text-stone-600 text-[11px] font-semibold">
                 <th className="py-3 px-3 w-10 text-center">
                   <input
                     type="checkbox"

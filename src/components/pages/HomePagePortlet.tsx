@@ -56,16 +56,16 @@ export const HomePagePortlet: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-2xl p-6 text-white shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1">
+      <div className="bg-gradient-to-br from-[#7a301d] via-[#8d3c26] to-[#592215] rounded-2xl p-6.5 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border border-[#8d3c26]">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-700/80 text-blue-100 text-[11px] font-semibold tracking-wide uppercase">
+            <span className="px-2.5 py-0.5 rounded-md bg-[#5d2314] text-[#fceee9] text-[11px] font-semibold tracking-wide uppercase border border-[#a2513a]">
               Financial Period Oct 2026
             </span>
-            <span className="text-blue-300 text-xs">· Audit Window: 5 Days to Close</span>
+            <span className="text-[#f7d6cb] text-xs">· Audit Window: 5 Days to Close</span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight">Period Close Anomaly Management Center</h1>
-          <p className="text-blue-200 text-xs max-w-2xl leading-relaxed">
+          <h1 className="text-xl font-bold tracking-tight text-white">Period Close Anomaly Management Center</h1>
+          <p className="text-[#f7e0d7] text-xs max-w-2xl leading-relaxed">
             Continuous controls engine automatically surfaces accounting outliers, missing cyclical transactions, warehouse inventory discrepancies, and compliance rule violations before ledger lock.
           </p>
         </div>
@@ -73,7 +73,7 @@ export const HomePagePortlet: React.FC = () => {
         <button
           type="button"
           onClick={() => goToDashboard(activePortletTab)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-blue-900 rounded-xl text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm shrink-0"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#782e1b] rounded-xl text-xs font-bold hover:bg-[#faf4f0] transition-colors shadow-xs shrink-0"
         >
           <span>Go to Anomaly Dashboard</span>
           <ArrowRight className="w-4 h-4" />
@@ -81,23 +81,23 @@ export const HomePagePortlet: React.FC = () => {
       </div>
 
       {/* PORTLET WIDGET CONTAINER */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+      <div className="bg-white/95 rounded-2xl border border-[#ebdcd3] shadow-2xs overflow-hidden">
         {/* Portlet Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-              <ShieldAlert className="w-4 h-4" />
+        <div className="px-6 py-4.5 border-b border-[#ebdcd3] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#fbf8f5]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#fbf0eb] text-[#8d3c26] flex items-center justify-center font-bold">
+              <ShieldAlert className="w-4.5 h-4.5 text-[#8d3c26]" />
             </div>
             <div>
-              <h2 className="font-bold text-sm text-slate-900">Period Close Anomaly Portlet</h2>
-              <p className="text-[11px] text-slate-500">Top 5 high-priority anomalies requiring immediate review</p>
+              <h2 className="font-bold text-sm text-stone-900">Period Close Anomaly Portlet</h2>
+              <p className="text-[11px] text-stone-500">Top 5 high-priority anomalies requiring immediate review</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => goToDashboard(activePortletTab)}
-            className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 self-end sm:self-auto hover:underline"
+            className="text-xs font-bold text-[#8d3c26] hover:text-[#6e2b19] flex items-center gap-1 self-end sm:self-auto hover:underline"
           >
             <span>Go to Anomaly Dashboard</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -105,19 +105,19 @@ export const HomePagePortlet: React.FC = () => {
         </div>
 
         {/* 4 Portlet Tabs */}
-        <div className="px-6 bg-white border-b border-slate-200 flex items-center gap-6 text-xs font-semibold overflow-x-auto">
+        <div className="px-6 bg-white border-b border-[#ebdcd3] flex items-center gap-6 text-xs font-semibold overflow-x-auto">
           <button
             type="button"
             onClick={() => setActivePortletTab('transactions')}
-            className={`py-3 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
+            className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activePortletTab === 'transactions'
-                ? 'border-blue-600 text-blue-700 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#8d3c26] text-[#8d3c26] font-bold'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-blue-600" />
+            <AlertTriangle className="w-3.5 h-3.5 text-[#8d3c26]" />
             <span>Transaction Anomalies</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-50 text-blue-700">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#fbf0eb] text-[#8d3c26]">
               {topTransactions.length}
             </span>
           </button>
@@ -125,15 +125,15 @@ export const HomePagePortlet: React.FC = () => {
           <button
             type="button"
             onClick={() => setActivePortletTab('expected-missing')}
-            className={`py-3 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
+            className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activePortletTab === 'expected-missing'
-                ? 'border-blue-600 text-blue-700 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#8d3c26] text-[#8d3c26] font-bold'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
-            <Clock className="w-3.5 h-3.5 text-indigo-600" />
+            <Clock className="w-3.5 h-3.5 text-[#8d3c26]" />
             <span>Expected / Missing</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-50 text-indigo-700">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#fbf0eb] text-[#8d3c26]">
               {topExpectedMissing.length}
             </span>
           </button>
@@ -141,15 +141,15 @@ export const HomePagePortlet: React.FC = () => {
           <button
             type="button"
             onClick={() => setActivePortletTab('inventory')}
-            className={`py-3 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
+            className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activePortletTab === 'inventory'
-                ? 'border-blue-600 text-blue-700 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#8d3c26] text-[#8d3c26] font-bold'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
-            <Boxes className="w-3.5 h-3.5 text-amber-600" />
+            <Boxes className="w-3.5 h-3.5 text-[#8d3c26]" />
             <span>Inventory Anomalies</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-50 text-amber-700">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#fbf0eb] text-[#8d3c26]">
               {topInventory.length}
             </span>
           </button>
@@ -157,15 +157,15 @@ export const HomePagePortlet: React.FC = () => {
           <button
             type="button"
             onClick={() => setActivePortletTab('custom')}
-            className={`py-3 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
+            className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activePortletTab === 'custom'
-                ? 'border-blue-600 text-blue-700 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#8d3c26] text-[#8d3c26] font-bold'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
-            <Cpu className="w-3.5 h-3.5 text-emerald-600" />
+            <Cpu className="w-3.5 h-3.5 text-[#8d3c26]" />
             <span>Custom Anomalies</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-50 text-emerald-700">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#fbf0eb] text-[#8d3c26]">
               {topCustom.length}
             </span>
           </button>

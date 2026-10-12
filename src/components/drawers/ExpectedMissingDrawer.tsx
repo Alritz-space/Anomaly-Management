@@ -13,6 +13,9 @@ import {
   History,
   AlertCircle,
   Calendar,
+  ThumbsUp,
+  ThumbsDown,
+  Trash2,
 } from 'lucide-react';
 
 interface Props {
@@ -25,6 +28,7 @@ export const ExpectedMissingDrawer: React.FC<Props> = ({ anomaly, onClose }) => 
     markResolved,
     markNoAction,
     reopenAnomaly,
+    discardAnomaly,
     toggleBookmark,
     openTransactionModal,
     openEntityModal,
@@ -241,6 +245,19 @@ export const ExpectedMissingDrawer: React.FC<Props> = ({ anomaly, onClose }) => 
         </button>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const ok = discardAnomaly('expected-missing', anomaly.id, note);
+              if (ok) onClose();
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs font-semibold hover:bg-rose-100 transition-colors shadow-2xs"
+            title="Remove this exception from system"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+            Discard
+          </button>
+
           {anomaly.status === 'Verified' ? (
             <button
               type="button"
@@ -272,8 +289,8 @@ export const ExpectedMissingDrawer: React.FC<Props> = ({ anomaly, onClose }) => 
                 }}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-100 transition-colors shadow-2xs"
               >
-                <MinusCircle className="w-3.5 h-3.5 text-slate-500" />
-                No Action Needed
+                <ThumbsDown className="w-3.5 h-3.5 text-slate-500" />
+                Not an Error
               </button>
 
               <button
@@ -284,7 +301,7 @@ export const ExpectedMissingDrawer: React.FC<Props> = ({ anomaly, onClose }) => 
                 }}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-colors shadow-xs"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <ThumbsUp className="w-3.5 h-3.5" />
                 Mark Resolved
               </button>
             </>

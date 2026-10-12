@@ -43,10 +43,16 @@ A single-page web application prototype built for financial controllers, interna
 - **Text Sanitization & Prompt Injection Defense**: 500-character ceiling, HTML tag stripping, and regex-based prompt injection pattern blocking.
 - **Over-Broad Rule Guard**: Requires explicit user acknowledgement if a rule matches >50% of transactions.
 
-#### B. Action Guardrails
-- **Bulk Confirmation**: Mandatory confirmation dialog for bulk actions affecting more than 5 records (hard cap of 100 items).
-- **Undo Toast**: 10-second rollback window for *Mark Resolved*, *No Action Needed*, and *Reopen* actions.
-- **No-Action Abuse Nudge**: Detects when an entity + anomaly type is dismissed with *No Action* 3+ times and recommends adjusting thresholds.
+#### B. Action Guardrails & Review Workflow
+- **Bulk Action Confirmation & Comments**: Interactive confirmation modal ("Are you sure?") with an optional justification comment box, Cancel and Continue action buttons, and a "Do not show this message again" preference checkbox.
+- **Bulk Exception Removal**: Added bulk action to remove/discard exceptions that users do not agree with.
+- **Not an Error Classification**: Uses "Not an Error" (with thumbs down icon) in place of "No Action Needed" across bulk bars and drawers.
+- **Details Drawer Actions**:
+  - **Mark Resolved** with Thumbs Up icon.
+  - **Not an Error** with Thumbs Down icon.
+  - **Discard** button with a Bin icon to completely remove the exception from the system.
+- **Undo Toast**: 10-second rollback window for review actions.
+- **No-Action Abuse Nudge**: Detects when an entity + anomaly type is dismissed with *Not an Error* 3+ times and recommends adjusting thresholds.
 - **Mandatory Resolution Notes**: High-impact items require at least 10 characters of explanation before dismissal.
 - **Role-Based Access Control (RBAC)**:
   - **Admin**: Full access to global configuration, rules activation/pausal, and anomaly review.

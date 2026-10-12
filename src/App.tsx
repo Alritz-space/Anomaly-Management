@@ -43,7 +43,7 @@ const AppContent: React.FC = () => {
   } = useAnomaly();
 
   return (
-    <div className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col font-sans antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-[#faf7f4] text-stone-900 flex flex-col font-sans antialiased selection:bg-[#f2dfd8] selection:text-[#6c281a]">
       {/* Enterprise ERP Global Navigation Header */}
       <Header />
 

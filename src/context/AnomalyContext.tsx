@@ -65,7 +65,7 @@ export interface BulkConfirmationModalState {
   isOpen: boolean;
   type: 'transaction' | 'expected-missing' | 'inventory' | 'custom';
   ids: string[];
-  action: 'resolve' | 'no-action' | 'reopen';
+  action: 'resolve' | 'no-action' | 'reopen' | 'discard';
 }
 
 interface AnomalyContextType {
@@ -152,8 +152,13 @@ interface AnomalyContextType {
   bulkUpdateStatus: (
     type: 'transaction' | 'expected-missing' | 'inventory' | 'custom',
     ids: string[],
-    action: 'resolve' | 'no-action' | 'reopen'
+    action: 'resolve' | 'no-action' | 'reopen' | 'discard'
   ) => void;
+  discardAnomaly: (
+    type: 'transaction' | 'expected-missing' | 'inventory' | 'custom',
+    id: string,
+    note?: string
+  ) => boolean;
   toggleBookmark: (
     type: 'transaction' | 'expected-missing' | 'inventory' | 'custom',
     id: string
@@ -166,7 +171,7 @@ interface AnomalyContextType {
   dismissUndo: () => void;
   bulkConfirmModal: BulkConfirmationModalState | null;
   closeBulkConfirmModal: () => void;
-  executeBulkActionConfirmed: () => void;
+  executeBulkActionConfirmed: (comment?: string, doNotShowAgain?: boolean) => void;
   noActionAbuseNudge: string | null;
   dismissNoActionNudge: () => void;
 
@@ -747,11 +752,61 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return true;
   };
 
-  // Bulk update with policy enforcement (> 5 triggers confirmation modal, hard cap 100)
+  // Discard Anomaly (Completely removes the exception from the system)
+  const discardAnomaly = (
+    type: 'transaction' | 'expected-missing' | 'inventory' | 'custom',
+    id: string,
+    note?: string
+  ): boolean => {
+    const perms = getRolePermissions(currentUserRole);
+    if (!perms.canReviewAnomalies) {
+      logGuardrailEvent({
+        type: 'RBAC Restriction',
+        severity: 'medium',
+        actionTaken: 'blocked',
+        reason: getActionRestrictionReason('review', currentUserRole),
+      });
+      addToast('Permission Denied', getActionRestrictionReason('review', currentUserRole), 'error');
+      return false;
+    }
+
+    if (type === 'transaction') {
+      setTransactionAnomalies((prev) => prev.filter((item) => item.id !== id));
+    } else if (type === 'expected-missing') {
+      setExpectedMissingAnomalies((prev) => prev.filter((item) => item.id !== id));
+    } else if (type === 'inventory') {
+      setInventoryAnomalies((prev) => prev.filter((item) => item.id !== id));
+    } else if (type === 'custom') {
+      setCustomAnomalies((prev) => prev.filter((item) => item.id !== id));
+    }
+
+    logAuditEntry({
+      user: currentUserRole,
+      action: 'Anomaly Discarded',
+      category: 'Status Change',
+      entityId: id,
+      after: 'Discarded (Removed)',
+      details: note ? `Discard justification: ${note}` : 'Exception removed from system.',
+    });
+
+    addToast('Anomaly Discarded', `Anomaly ${id} has been removed from the system.`, 'info');
+    return true;
+  };
+
+  // Skip confirmation preference state
+  const [skipBulkConfirmation, setSkipBulkConfirmation] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('erp_skip_bulk_confirm') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Bulk update with confirmation modal prompt, optional comments, and discard action support
   const bulkUpdateStatus = (
     type: 'transaction' | 'expected-missing' | 'inventory' | 'custom',
     ids: string[],
-    action: 'resolve' | 'no-action' | 'reopen'
+    action: 'resolve' | 'no-action' | 'reopen' | 'discard'
   ) => {
     const perms = getRolePermissions(currentUserRole);
     if (!perms.canPerformBulkActions) {
@@ -777,29 +832,68 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
-    if (policy.requiresConfirmation) {
+    // Always ask confirmation if not opted out via 'Do not show this message again'
+    if (!skipBulkConfirmation) {
       setBulkConfirmModal({ isOpen: true, type, ids, action });
       return;
     }
 
-    // Execute immediately if <= 5
+    // Otherwise execute immediately
     executeBulkInternal(type, ids, action);
   };
 
   const closeBulkConfirmModal = () => setBulkConfirmModal(null);
 
-  const executeBulkActionConfirmed = () => {
+  const executeBulkActionConfirmed = (comment?: string, doNotShowAgain?: boolean) => {
     if (!bulkConfirmModal) return;
     const { type, ids, action } = bulkConfirmModal;
-    executeBulkInternal(type, ids, action);
+
+    if (doNotShowAgain) {
+      setSkipBulkConfirmation(true);
+      try {
+        localStorage.setItem('erp_skip_bulk_confirm', 'true');
+      } catch {
+        // ignore localStorage errors
+      }
+    }
+
+    executeBulkInternal(type, ids, action, comment);
     setBulkConfirmModal(null);
   };
 
   const executeBulkInternal = (
     type: 'transaction' | 'expected-missing' | 'inventory' | 'custom',
     ids: string[],
-    action: 'resolve' | 'no-action' | 'reopen'
+    action: 'resolve' | 'no-action' | 'reopen' | 'discard',
+    comment?: string
   ) => {
+    if (action === 'discard') {
+      const filterOut = (item: any) => !ids.includes(item.id);
+      if (type === 'transaction') {
+        setTransactionAnomalies((prev) => prev.filter(filterOut));
+      } else if (type === 'expected-missing') {
+        setExpectedMissingAnomalies((prev) => prev.filter(filterOut));
+      } else if (type === 'inventory') {
+        setInventoryAnomalies((prev) => prev.filter(filterOut));
+      } else if (type === 'custom') {
+        setCustomAnomalies((prev) => prev.filter(filterOut));
+      }
+
+      logAuditEntry({
+        user: currentUserRole,
+        action: 'Bulk Action: DISCARD',
+        category: 'Bulk Action',
+        details: `Bulk removed ${ids.length} anomalies of type "${type}" from system.${comment ? ` Comment: ${comment}` : ''}`,
+      });
+
+      addToast(
+        'Bulk Action Completed',
+        `Successfully removed ${ids.length} anomalies from system.`,
+        'success'
+      );
+      return;
+    }
+
     const targetStatus: AnomalyStatus = action === 'reopen' ? 'Reopen' : 'Verified';
     const resolutionType =
       action === 'resolve' ? ('Resolved' as const) : action === 'no-action' ? ('No Action Needed' as const) : undefined;
@@ -810,6 +904,7 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             ...item,
             status: targetStatus,
             resolutionType: resolutionType !== undefined ? resolutionType : item.resolutionType,
+            resolutionNote: comment ? (item.resolutionNote ? `${item.resolutionNote} | Bulk: ${comment}` : `Bulk: ${comment}`) : item.resolutionNote,
           }
         : item;
 
@@ -827,7 +922,7 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       user: currentUserRole,
       action: `Bulk Action: ${action.toUpperCase()}`,
       category: 'Bulk Action',
-      details: `Bulk updated ${ids.length} anomalies of type "${type}" to "${targetStatus}".`,
+      details: `Bulk updated ${ids.length} anomalies of type "${type}" to "${targetStatus}".${comment ? ` Comment: ${comment}` : ''}`,
     });
 
     addToast(
@@ -1080,6 +1175,7 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         markResolved,
         markNoAction,
         reopenAnomaly,
+        discardAnomaly,
         bulkUpdateStatus,
         toggleBookmark,
         assignCustomAnomaly,

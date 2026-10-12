@@ -11,6 +11,9 @@ import {
   RotateCcw,
   CheckCircle2,
   MinusCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Trash2,
   MapPin,
   TrendingDown,
 } from 'lucide-react';
@@ -256,9 +259,9 @@ export const InventoryAnomaliesTab: React.FC = () => {
                   bulkUpdateStatus('inventory', selectedIds, 'resolve');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-md font-semibold hover:bg-emerald-700 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md font-semibold hover:bg-emerald-700 transition-colors shadow-2xs"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <ThumbsUp className="w-3.5 h-3.5" />
                 Mark Resolved
               </button>
               <button
@@ -267,10 +270,21 @@ export const InventoryAnomaliesTab: React.FC = () => {
                   bulkUpdateStatus('inventory', selectedIds, 'no-action');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-md font-semibold hover:bg-slate-100 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-md font-semibold hover:bg-slate-100 transition-colors shadow-2xs"
               >
-                <MinusCircle className="w-3.5 h-3.5 text-slate-500" />
-                No Action Needed
+                <ThumbsDown className="w-3.5 h-3.5 text-slate-500" />
+                Not an Error
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  bulkUpdateStatus('inventory', selectedIds, 'discard');
+                  setSelectedIds([]);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-300 text-rose-700 rounded-md font-semibold hover:bg-rose-100 transition-colors shadow-2xs"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                Remove Exceptions
               </button>
               <button
                 type="button"
@@ -278,7 +292,7 @@ export const InventoryAnomaliesTab: React.FC = () => {
                   bulkUpdateStatus('inventory', selectedIds, 'reopen');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transition-colors shadow-2xs"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reopen

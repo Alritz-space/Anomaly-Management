@@ -11,8 +11,6 @@ import {
   Boxes,
   Cpu,
   Info,
-  Layers,
-  HelpCircle,
 } from 'lucide-react';
 
 export const AnomalyDashboardPage: React.FC = () => {
@@ -27,25 +25,21 @@ export const AnomalyDashboardPage: React.FC = () => {
   } = useAnomaly();
 
   // Counts for the 4 Summary Cards Acting as Tabs:
-  // 1. Transaction Anomalies (count)
   const txCount = effectiveTransactionAnomalies.length;
   const txPending = effectiveTransactionAnomalies.filter(
     (x) => x.status === 'Need Review' || x.status === 'Reopen'
   ).length;
 
-  // 2. Expected / Missing (count of missing and predicted)
   const expMissingCount = effectiveExpectedMissingAnomalies.length;
   const expMissingPending = effectiveExpectedMissingAnomalies.filter(
     (x) => x.status === 'Need Review' || x.status === 'Reopen'
   ).length;
 
-  // 3. Inventory Anomalies (count flagged)
   const invCount = effectiveInventoryAnomalies.length;
   const invPending = effectiveInventoryAnomalies.filter(
     (x) => x.status === 'Need Review' || x.status === 'Reopen'
   ).length;
 
-  // 4. Custom Anomalies (count of rule types)
   const customRuleCount = rules.length;
   const customAnomPending = effectiveCustomAnomalies.filter(
     (x) => x.status === 'Need Review' || x.status === 'Reopen'
@@ -53,53 +47,53 @@ export const AnomalyDashboardPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Title & How-to-use Guidance Text Required by Prompt */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs">
+      {/* Title & How-to-use Guidance Header */}
+      <div className="bg-white/95 rounded-2xl border border-[#ebdcd3] p-6 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              Anomaly Dashboard
-            </h1>
-            <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
-              How to use: Select an anomaly category tab below to review flagged accounting outliers. Use the importance sensitivity slider to isolate critical transactions, filter by entity or subsidiary, and review individual line discrepancies in the side drawer. Take bulk actions or resolve anomalies individually to clear items before closing the fiscal period.
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-bold tracking-tight text-stone-900">
+                Anomaly Dashboard
+              </h1>
+              <span className="text-xs text-stone-400 font-normal">·</span>
+              <span className="text-xs font-medium text-[#8d3c26]">Continuous Financial Intelligence</span>
+            </div>
+            <p className="text-xs text-stone-600 max-w-3xl leading-relaxed">
+              Review flagged general ledger outliers and cycle variances before fiscal period close. Use the sensitivity slider to focus on high-impact transactions, filter by entity or account, and inspect details in the drawer.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 shrink-0 self-start md:self-auto">
-            <Info className="w-4 h-4 text-blue-600 shrink-0" />
-            <span>Click any summary card to switch anomaly domain</span>
+          <div className="flex items-center gap-2 text-xs text-stone-600 bg-[#fbf5f2] px-3.5 py-2 rounded-xl border border-[#ebdcd3] shrink-0 self-start md:self-auto">
+            <Info className="w-4 h-4 text-[#8d3c26] shrink-0" />
+            <span>Select a domain card below to switch audit view</span>
           </div>
         </div>
       </div>
 
-      {/* 4 Summary Cards That Act as Tabs Required by Prompt:
-          - Transaction Anomalies (count)
-          - Expected / Missing (count of missing and predicted)
-          - Inventory Anomalies (count flagged)
-          - Custom Anomalies (count of rule types) */}
+      {/* 4 Summary Cards That Act as Domain Tabs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
-          label="Transaction Anomalies"
+          label="Transaction Outliers"
           value={txCount}
           subValue={`${txPending} pending review`}
           badge={txPending > 0 ? `${txPending} Action Required` : 'Verified'}
-          badgeColor={txPending > 0 ? 'amber' : 'emerald'}
-          icon={<AlertTriangle className="w-5 h-5 text-blue-600" />}
+          badgeColor={txPending > 0 ? 'redwood' : 'emerald'}
+          icon={<AlertTriangle className="w-5 h-5 text-[#8d3c26]" />}
           isActive={dashboardTab === 'transactions'}
           onClick={() => setDashboardTab('transactions')}
-          description="Outlier amounts, accounts, segments & duplicates"
+          description="Unusual amounts, accounts & duplicate batches"
         />
 
         <KpiCard
           label="Expected / Missing"
           value={expMissingCount}
           subValue={`${expMissingPending} pending review`}
-          badge="Cyclical Variance"
-          badgeColor="blue"
-          icon={<Clock className="w-5 h-5 text-indigo-600" />}
+          badge="Cycle Variance"
+          badgeColor="redwood"
+          icon={<Clock className="w-5 h-5 text-[#8d3c26]" />}
           isActive={dashboardTab === 'expected-missing'}
           onClick={() => setDashboardTab('expected-missing')}
-          description="Predicted and missed recurring transactions"
+          description="Predicted and omitted recurring entries"
         />
 
         <KpiCard
@@ -108,22 +102,22 @@ export const AnomalyDashboardPage: React.FC = () => {
           subValue={`${invPending} pending review`}
           badge="Stock Risks"
           badgeColor="amber"
-          icon={<Boxes className="w-5 h-5 text-amber-600" />}
+          icon={<Boxes className="w-5 h-5 text-[#8d3c26]" />}
           isActive={dashboardTab === 'inventory'}
           onClick={() => setDashboardTab('inventory')}
-          description="Projected stockouts, overstock & safety shortfalls"
+          description="Projected stockouts & safety buffer risks"
         />
 
         <KpiCard
           label="Custom Anomalies"
           value={customRuleCount}
           subValue={`${customAnomPending} matching items`}
-          badge="Active Rules"
-          badgeColor="purple"
-          icon={<Cpu className="w-5 h-5 text-purple-600" />}
+          badge="Audit Rules"
+          badgeColor="redwood"
+          icon={<Cpu className="w-5 h-5 text-[#8d3c26]" />}
           isActive={dashboardTab === 'custom'}
           onClick={() => setDashboardTab('custom')}
-          description="User-defined controls & SOX audit criteria"
+          description="User-defined controls & SOX audit logic"
         />
       </div>
 
