@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Building,
   Snowflake,
+  RotateCcw,
 } from 'lucide-react';
 
 export const DevToolbar: React.FC = () => {
@@ -23,6 +24,7 @@ export const DevToolbar: React.FC = () => {
     setColdStartEnabled,
     evalConfigVersion,
     setEvalConfigVersion,
+    resetAllDataToBaseline,
     activePage,
     setActivePage,
     addToast,
@@ -193,6 +195,16 @@ export const DevToolbar: React.FC = () => {
                 {blockedCount}
               </span>
             )}
+          </button>
+
+          <button
+            type="button"
+            onClick={resetAllDataToBaseline}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#3a1f19] hover:bg-[#59261c] text-stone-300 hover:text-white transition-colors cursor-pointer"
+            title="Reset all reviewed anomalies and task states back to original prototype baseline"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#e8a292]" />
+            <span>Reset Demo Data</span>
           </button>
 
           <button

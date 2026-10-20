@@ -61,9 +61,9 @@ export const TransactionAnomalyDrawer: React.FC<Props> = ({ anomaly, onClose }) 
   }[anomaly.status];
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-136 md:w-160 bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-250">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-136 md:w-160 bg-white shadow-2xl z-50 flex flex-col border-l border-[#ebdcd3] animate-in slide-in-from-right duration-250">
       {/* Header */}
-      <div className="p-5 border-b border-slate-200 bg-slate-50/70">
+      <div className="p-5 border-b border-[#ebdcd3] bg-[#fbf7f4]">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -332,11 +332,11 @@ export const TransactionAnomalyDrawer: React.FC<Props> = ({ anomaly, onClose }) 
       </div>
 
       {/* Drawer Action Footer */}
-      <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+      <div className="p-4 border-t border-[#ebdcd3] bg-[#fbf7f4] flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={onClose}
-          className="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-lg transition-colors"
+          className="px-3 py-2 text-xs font-medium text-stone-600 hover:text-stone-900 rounded-lg transition-colors"
         >
           Close Drawer
         </button>

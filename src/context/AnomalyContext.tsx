@@ -32,6 +32,8 @@ import {
 } from '../guardrails/actionPolicies';
 import { runAllEvals } from '../evals/runner';
 import { EvalRunSummary, EvalRunHistoryEntry } from '../types/evals';
+import { ResearchScenario, GuidedTask, UserFeedbackEntry } from '../types/research';
+import { RESEARCH_SCENARIOS, GUIDED_TASKS } from '../data/researchScenarios';
 
 export type ActivePage =
   | 'dashboard'
@@ -200,6 +202,26 @@ interface AnomalyContextType {
   toasts: ToastNotification[];
   addToast: (title: string, message: string, type?: ToastNotification['type']) => void;
   removeToast: (id: string) => void;
+
+  // Enterprise Guided Learning & User Research
+  activeScenario: ResearchScenario | null;
+  selectScenario: (scenarioId: string | null) => void;
+  activeGuidedTaskIndex: number;
+  setActiveGuidedTaskIndex: (index: number) => void;
+  completedTaskIds: string[];
+  markTaskComplete: (taskId: string) => void;
+  isGuidedLearningHubOpen: boolean;
+  setIsGuidedLearningHubOpen: (open: boolean) => void;
+  isGuidedBannerVisible: boolean;
+  setIsGuidedBannerVisible: (visible: boolean) => void;
+  isFeedbackModalOpen: boolean;
+  setIsFeedbackModalOpen: (open: boolean) => void;
+  feedbackEntries: UserFeedbackEntry[];
+  submitFeedback: (entry: Omit<UserFeedbackEntry, 'id' | 'timestamp' | 'userName' | 'userRole'>) => void;
+  submitUserFeedback: (entry: Omit<UserFeedbackEntry, 'id' | 'timestamp' | 'userName' | 'userRole'>) => void;
+  guidedTasks: GuidedTask[];
+  researchScenarios: ResearchScenario[];
+  resetAllDataToBaseline: () => void;
 }
 
 const AnomalyContext = createContext<AnomalyContextType | undefined>(undefined);
@@ -253,6 +275,88 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Toasts
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
+
+  // Enterprise Guided Learning & User Research State
+  const [activeScenario, setActiveScenario] = useState<ResearchScenario | null>(RESEARCH_SCENARIOS[0]);
+  const [activeGuidedTaskIndex, setActiveGuidedTaskIndex] = useState<number>(0);
+  const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
+  const [isGuidedLearningHubOpen, setIsGuidedLearningHubOpen] = useState<boolean>(false);
+  const [isGuidedBannerVisible, setIsGuidedBannerVisible] = useState<boolean>(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState<boolean>(false);
+  const [feedbackEntries, setFeedbackEntries] = useState<UserFeedbackEntry[]>([
+    {
+      id: 'FB-901',
+      timestamp: '2026-10-06 14:22',
+      userName: 'Marcus Vance',
+      userRole: 'Enterprise Auditor',
+      easeRating: 5,
+      explainabilityRating: 5,
+      guardrailsTrustRating: 5,
+      primaryFrictionPoint: 'None - Bulk undo countdown is extremely reassuring for internal controls',
+      comments: 'Clear distinction between Resolved and Not an Error. The 10s undo window aligns with enterprise safety requirements.',
+    },
+  ]);
+
+  const selectScenario = (scenarioId: string | null) => {
+    if (!scenarioId) {
+      setActiveScenario(null);
+      addToast('Research Scenario Cleared', 'Custom workspace mode active.', 'info');
+      return;
+    }
+    const found = RESEARCH_SCENARIOS.find((s) => s.id === scenarioId);
+    if (found) {
+      setActiveScenario(found);
+      setActivePage('dashboard');
+      setDashboardTab(found.targetTab);
+      addToast(
+        `Scenario Loaded: ${found.title}`,
+        `${found.subtitle}. Follow the guided checklist to complete evaluation.`,
+        'success'
+      );
+    }
+  };
+
+  const markTaskComplete = (taskId: string) => {
+    setCompletedTaskIds((prev) => {
+      if (prev.includes(taskId)) return prev;
+      return [...prev, taskId];
+    });
+    addToast('Task Completed', 'Evaluation step marked complete. Proceed to next task.', 'success');
+  };
+
+  const submitFeedback = (entry: Omit<UserFeedbackEntry, 'id' | 'timestamp' | 'userName' | 'userRole'>) => {
+    const newEntry: UserFeedbackEntry = {
+      ...entry,
+      id: `FB-${Date.now().toString().slice(-4)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      userName: 'Sarah Jenkins',
+      userRole: currentUserRole,
+    };
+    setFeedbackEntries((prev) => [newEntry, ...prev]);
+    logAuditEntry({
+      action: 'USER_RESEARCH_FEEDBACK_SUBMITTED',
+      category: 'User Research / Feedback',
+      entityId: newEntry.id,
+      details: `Usability score: ${entry.rating || entry.easeRating || 5}/5 | Notes: ${entry.comments || entry.frictionPoints || 'General research input'}`,
+      user: 'Sarah Jenkins',
+    });
+    addToast('Feedback Recorded', 'Thank you! Your evaluation inputs have been saved to the prototype research log.', 'success');
+    setIsFeedbackModalOpen(false);
+  };
+
+  const submitUserFeedback = submitFeedback;
+
+  const resetAllDataToBaseline = () => {
+    setTransactionAnomalies(INITIAL_TRANSACTION_ANOMALIES);
+    setExpectedMissingAnomalies(INITIAL_EXPECTED_MISSING);
+    setInventoryAnomalies(INITIAL_INVENTORY_ANOMALIES);
+    setCustomAnomalies(INITIAL_CUSTOM_ANOMALIES);
+    setRules(INITIAL_RULES);
+    setCompletedTaskIds([]);
+    setUndoAction(null);
+    setBulkConfirmModal(null);
+    addToast('Data Reset', 'All anomaly statuses and evaluation progress reset to initial baseline.', 'info');
+  };
 
   // Initialize evals on first load
   useEffect(() => {
@@ -1205,6 +1309,24 @@ export const AnomalyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toasts,
         addToast,
         removeToast,
+        activeScenario,
+        selectScenario,
+        activeGuidedTaskIndex,
+        setActiveGuidedTaskIndex,
+        completedTaskIds,
+        markTaskComplete,
+        isGuidedLearningHubOpen,
+        setIsGuidedLearningHubOpen,
+        isGuidedBannerVisible,
+        setIsGuidedBannerVisible,
+        isFeedbackModalOpen,
+        setIsFeedbackModalOpen,
+        feedbackEntries,
+        submitFeedback,
+        submitUserFeedback,
+        guidedTasks: GUIDED_TASKS,
+        researchScenarios: RESEARCH_SCENARIOS,
+        resetAllDataToBaseline,
       }}
     >
       {children}

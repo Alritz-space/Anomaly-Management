@@ -3,6 +3,7 @@ import { useAnomaly } from '../../context/AnomalyContext';
 import { InventoryAnomaly, InventoryAnomalyType } from '../../types/anomaly';
 import { KpiCard } from '../common/KpiCard';
 import { Pagination } from '../common/Pagination';
+import { GuidedLearningCallout } from '../common/GuidedLearningCallout';
 import {
   Search,
   Star,
@@ -114,38 +115,51 @@ export const InventoryAnomaliesTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* 1 KPI Card Required by Prompt: "Anomalies Pending Review" */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiCard
-          label="Anomalies Pending Review"
-          value={pendingCount}
-          subValue={`of ${filteredList.length} items`}
-          badge="Stock Risk Priority"
-          badgeColor="amber"
-          icon={<Boxes className="w-5 h-5 text-amber-600" />}
-          description="Stockouts, overstock & projected shortage warnings"
-        />
-        <div className="sm:col-span-2 bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-2xs">
+    <div className="space-y-3.5">
+      {/* Sleek Top Metrics & MRP Telemetry Bar */}
+      <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[#fbf0eb] text-[#8d3c26] flex items-center justify-center shrink-0">
+            <Boxes className="w-4 h-4 text-[#8d3c26]" />
+          </div>
           <div>
-            <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider block">
-              Predictive MRP Telemetry
-            </span>
-            <p className="text-xs text-slate-500 mt-1 max-w-lg">
-              Projected balances evaluate purchase order receipts, lead times, and open sales orders against safety stock and reorder thresholds across regional hubs.
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-stone-900 uppercase tracking-wide">
+                Stock Risks & Imbalances
+              </span>
+              <span className="text-[10px] font-semibold text-[#8d3c26] bg-[#fbf0eb] px-2 py-0.2 rounded-md border border-[#ebdcd3]">
+                {pendingCount} Pending Review
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-500">
+              Evaluates purchase orders, lead times, and sales commitments against safety stock limits.
             </p>
           </div>
-          <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 shrink-0 hidden md:inline">
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto text-xs">
+          <span className="text-[11px] font-semibold text-[#8d3c26] bg-[#fbf5f2] px-2.5 py-1 rounded-lg border border-[#ebdcd3]">
             Lead Time Aware
           </span>
+          <span className="text-stone-400">·</span>
+          <span className="text-stone-600 font-medium text-[11px]">{filteredList.length} items surfaced</span>
         </div>
       </div>
 
+      {/* Guided Learning Callout for Inventory Reconciliation */}
+      <GuidedLearningCallout
+        badge="Supply Chain Protocol"
+        title="Physical Inventory Discrepancy & Valuation Reconciliation"
+        description="Cycle count variations and negative on-hand quantities indicate potential unrecorded shrinkage, receipt slippage, or duplicate item fulfillments. Review location telemetry and safety buffer thresholds before triggering inventory adjustment write-offs."
+        complianceNote="SOX 404 Valuation & Allocation: Material inventory write-downs require verified cycle recounts and inventory manager sign-off."
+        storageKey="inv_anomaly_guidance"
+      />
+
       {/* Filter Bar: search item name + search location + filters */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-2xs">
+      <div className="bg-white/95 border border-[#ebdcd3] rounded-2xl p-4.5 space-y-3.5 shadow-2xs">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={searchTerm}
@@ -154,12 +168,12 @@ export const InventoryAnomaliesTab: React.FC = () => {
                 setCurrentPage(1);
               }}
               placeholder="Search by item name or SKU..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              className="w-full pl-9 pr-3 py-1.5 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-xs text-stone-800 placeholder-stone-400 focus:bg-white focus:ring-2 focus:ring-[#8d3c26] focus:outline-hidden"
             />
           </div>
 
           <div className="relative">
-            <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <MapPin className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={locationSearch}
@@ -168,7 +182,7 @@ export const InventoryAnomaliesTab: React.FC = () => {
                 setCurrentPage(1);
               }}
               placeholder="Search by warehouse location..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              className="w-full pl-9 pr-3 py-1.5 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-xs text-stone-800 placeholder-stone-400 focus:bg-white focus:ring-2 focus:ring-[#8d3c26] focus:outline-hidden"
             />
           </div>
 

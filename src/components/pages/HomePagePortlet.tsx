@@ -11,6 +11,10 @@ import {
   Boxes,
   Cpu,
   Layers,
+  Compass,
+  BookOpen,
+  MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 
 export const HomePagePortlet: React.FC = () => {
@@ -25,6 +29,13 @@ export const HomePagePortlet: React.FC = () => {
     openTransactionModal,
     openEntityModal,
     toggleBookmark,
+    activeScenario,
+    selectScenario,
+    researchScenarios,
+    setIsGuidedLearningHubOpen,
+    setIsFeedbackModalOpen,
+    completedTaskIds,
+    guidedTasks,
   } = useAnomaly();
 
   const [activePortletTab, setActivePortletTab] = useState<
@@ -78,6 +89,93 @@ export const HomePagePortlet: React.FC = () => {
           <span>Go to Anomaly Dashboard</span>
           <ArrowRight className="w-4 h-4" />
         </button>
+      </div>
+
+      {/* Enterprise User Research & Guided Learning Launchpad */}
+      <div className="bg-white/95 rounded-2xl border border-[#ebdcd3] p-5 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#ebdcd3]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#fbf0eb] text-[#8d3c26] flex items-center justify-center font-bold">
+              <Compass className="w-5 h-5 text-[#8d3c26]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-sm text-stone-900">Enterprise Research & Guided Audit Workflows</h3>
+                <span className="px-2 py-0.5 rounded-full bg-[#fbf0eb] text-[#8d3c26] text-[10px] font-bold uppercase tracking-wider">
+                  Interactive Evaluation
+                </span>
+              </div>
+              <p className="text-[11px] text-stone-500">
+                Test pre-seeded enterprise scenarios designed for controllers, SOX auditors, and operational accountants.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsGuidedLearningHubOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#8d3c26] text-white hover:bg-[#782e1d] rounded-xl text-xs font-semibold transition-colors shadow-2xs"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Open Guided Learning Hub</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsFeedbackModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#ebdcd3] text-stone-700 hover:bg-[#fbf7f4] rounded-xl text-xs font-semibold transition-colors shadow-2xs"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-stone-500" />
+              <span>Participant Feedback</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Interactive Scenario Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {researchScenarios.map((sc) => {
+            const isSelected = activeScenario?.id === sc.id;
+            return (
+              <div
+                key={sc.id}
+                onClick={() => {
+                  selectScenario(sc.id);
+                  goToDashboard(sc.targetTab);
+                }}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group ${
+                  isSelected
+                    ? 'border-[#8d3c26] bg-[#fbf5f2] ring-1 ring-[#8d3c26] shadow-2xs'
+                    : 'border-[#ebdcd3] bg-white hover:border-[#cb927b] hover:bg-[#fdfaf8]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-mono font-bold text-[#8d3c26] px-1.5 py-0.5 rounded bg-[#f6ede7]">
+                      {sc.badge}
+                    </span>
+                    {isSelected && (
+                      <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8d3c26] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#8d3c26]"></span>
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="font-bold text-xs text-stone-900 group-hover:text-[#8d3c26] transition-colors leading-snug">
+                    {sc.title}
+                  </h4>
+                  <p className="text-[11px] text-stone-500 mt-1 line-clamp-2 leading-relaxed">
+                    {sc.subtitle}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-[#ebdcd3]/70 flex items-center justify-between text-[11px]">
+                  <span className="text-stone-400 font-medium">Click to Launch</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#8d3c26] group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* PORTLET WIDGET CONTAINER */}

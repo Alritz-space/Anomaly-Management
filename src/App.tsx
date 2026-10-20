@@ -14,6 +14,9 @@ import { DevToolbar } from './components/common/DevToolbar';
 import { UndoToast } from './components/common/UndoToast';
 import { BulkConfirmationModal } from './components/common/BulkConfirmationModal';
 import { NoActionAbuseNudge } from './components/common/NoActionAbuseNudge';
+import { GuidedStepBanner } from './components/research/GuidedStepBanner';
+import { GuidedLearningHubModal } from './components/research/GuidedLearningHubModal';
+import { ResearchFeedbackModal } from './components/research/ResearchFeedbackModal';
 import { TransactionAnomalyDrawer } from './components/drawers/TransactionAnomalyDrawer';
 import { ExpectedMissingDrawer } from './components/drawers/ExpectedMissingDrawer';
 import { InventoryAnomalyDrawer } from './components/drawers/InventoryAnomalyDrawer';
@@ -47,6 +50,9 @@ const AppContent: React.FC = () => {
       {/* Enterprise ERP Global Navigation Header */}
       <Header />
 
+      {/* Enterprise Guided Learning & User Research Top Banner */}
+      <GuidedStepBanner />
+
       <div className="flex-1 flex overflow-hidden">
         {/* Left Navigation Sidebar */}
         <Sidebar />
@@ -74,6 +80,10 @@ const AppContent: React.FC = () => {
 
       {/* Developer & Governance Testing Toolbar */}
       <DevToolbar />
+
+      {/* Guided Learning & User Research Modals */}
+      <GuidedLearningHubModal />
+      <ResearchFeedbackModal />
 
       {/* Drawers */}
       {activeDrawer?.type === 'transaction' && (

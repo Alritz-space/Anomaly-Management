@@ -17,6 +17,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Trash2,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   ResponsiveContainer,

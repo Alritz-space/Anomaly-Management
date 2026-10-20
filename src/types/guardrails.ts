@@ -44,7 +44,8 @@ export type AuditLogCategory =
   | 'Rule Management'
   | 'Configuration'
   | 'Guardrail Bypass Attempt'
-  | 'AI Evaluation';
+  | 'AI Evaluation'
+  | 'User Research / Feedback';
 
 export interface AuditLogEntry {
   id: string;

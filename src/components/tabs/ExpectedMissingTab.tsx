@@ -3,6 +3,7 @@ import { useAnomaly } from '../../context/AnomalyContext';
 import { ExpectedMissingAnomaly, TransactionType } from '../../types/anomaly';
 import { KpiCard } from '../common/KpiCard';
 import { Pagination } from '../common/Pagination';
+import { GuidedLearningCallout } from '../common/GuidedLearningCallout';
 import {
   Search,
   Star,
@@ -16,6 +17,10 @@ import {
   ThumbsUp,
   ThumbsDown,
   Trash2,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  X,
 } from 'lucide-react';
 import { SUBSIDIARIES, ACCOUNTING_PERIODS, TRANSACTION_TYPES } from '../../data/mockData';
 
@@ -41,9 +46,36 @@ export const ExpectedMissingTab: React.FC = () => {
   const [bookmarkedOnly, setBookmarkedOnly] = useState(false);
   const [withMemoOnly, setWithMemoOnly] = useState(false);
 
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
+
+  const activeFilterCount =
+    (filterTxType !== 'All' ? 1 : 0) +
+    (filterAnomalyType !== 'All' ? 1 : 0) +
+    (filterAccount !== 'All' ? 1 : 0) +
+    (filterPeriod !== 'All' ? 1 : 0) +
+    (filterEntity !== 'All' ? 1 : 0) +
+    (filterStatus !== 'All' ? 1 : 0) +
+    (filterSubsidiary !== 'All' ? 1 : 0) +
+    (bookmarkedOnly ? 1 : 0) +
+    (withMemoOnly ? 1 : 0);
+
+  const handleClearAllFilters = () => {
+    setSearchTerm('');
+    setFilterTxType('All');
+    setFilterAnomalyType('All');
+    setFilterAccount('All');
+    setFilterPeriod('All');
+    setFilterEntity('All');
+    setFilterStatus('All');
+    setFilterSubsidiary('All');
+    setBookmarkedOnly(false);
+    setWithMemoOnly(false);
+    setCurrentPage(1);
+  };
 
   // Selected for bulk
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -143,34 +175,61 @@ export const ExpectedMissingTab: React.FC = () => {
   }, [effectiveExpectedMissingAnomalies]);
 
   return (
-    <div className="space-y-4">
-      {/* 2 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <KpiCard
-          label="Expected Anomalies (Predicted)"
-          value={pendingExpected.length}
-          subValue={`$${expectedAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })} impact`}
-          badge="Upcoming Recurring"
-          badgeColor="blue"
-          icon={<Clock className="w-5 h-5 text-blue-600" />}
-          description="Predicted recurring transactions due before period close"
-        />
-        <KpiCard
-          label="Missing Anomalies (Overdue)"
-          value={pendingMissing.length}
-          subValue={`$${missingAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })} impact`}
-          badge="Overdue Recurring"
-          badgeColor="amber"
-          icon={<AlertCircle className="w-5 h-5 text-amber-600" />}
-          description="Expected bills or invoices that failed to arrive on schedule"
-        />
+    <div className="space-y-3.5">
+      {/* Sleek Top Metrics Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3.5 shadow-2xs flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+              Expected Recurring (Upcoming)
+            </span>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-xl font-bold text-stone-900">{pendingExpected.length}</span>
+              <span className="text-xs text-stone-500">
+                (${expectedAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })})
+              </span>
+            </div>
+            <span className="text-[10px] font-medium text-stone-500">Predicted cyclical disbursements</span>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-[#fbf0eb] text-[#8d3c26] flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4 text-[#8d3c26]" />
+          </div>
+        </div>
+
+        <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3.5 shadow-2xs flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#8d3c26]">
+              Missing / Overdue Liabilities
+            </span>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-xl font-bold text-[#8d3c26]">{pendingMissing.length}</span>
+              <span className="text-xs text-stone-500">
+                (${missingAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })})
+              </span>
+            </div>
+            <span className="text-[10px] font-medium text-stone-500">Omitted vendor invoices</span>
+          </div>
+          <div className="w-8 h-8 rounded-lg bg-[#fbf0eb] text-[#8d3c26] flex items-center justify-center shrink-0">
+            <AlertCircle className="w-4 h-4 text-[#8d3c26]" />
+          </div>
+        </div>
       </div>
 
+      {/* Guided Learning Callout for Accruals (collapsible 1-line bar) */}
+      <GuidedLearningCallout
+        badge="Accrual Protocol"
+        title="Unrecorded Liability & Recurrence Prediction"
+        description="Machine learning monitors historical recurring vendor disbursements (e.g. cloud subscriptions, facility leases, retainers) and detects omissions before period-end closing. For verified unreceived vendor bills, click 'Review' and select 'Create Transaction' to generate a pre-populated draft balancing entry."
+        complianceNote="GAAP Matching Principle & ASC 606: Guarantees expenses are matched to the correct accounting period."
+        storageKey="exp_missing_guidance"
+      />
+
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-2xs">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+      <div className="bg-white/95 border border-[#ebdcd3] rounded-2xl p-4.5 space-y-3.5 shadow-2xs">
+        {/* Row 1: Search, Quick Pills, and Filter Toggle */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
               value={searchTerm}
@@ -179,168 +238,243 @@ export const ExpectedMissingTab: React.FC = () => {
                 setCurrentPage(1);
               }}
               placeholder="Search by transaction/ref #, entity, or memo..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              className="w-full pl-9 pr-8 py-2 bg-[#fcf9f6] border border-[#ebdcd3] rounded-xl text-xs text-stone-800 placeholder-stone-400 focus:bg-white focus:ring-2 focus:ring-[#8d3c26] focus:border-transparent focus:outline-hidden transition-all"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2.5 top-2.5 text-stone-400 hover:text-stone-700"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center gap-4 self-end md:self-auto text-xs">
-            <label className="flex items-center gap-1.5 text-slate-700 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={bookmarkedOnly}
-                onChange={(e) => {
-                  setBookmarkedOnly(e.target.checked);
-                  setCurrentPage(1);
-                }}
-                className="rounded text-blue-600 focus:ring-blue-500"
-              />
-              <span className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                Bookmarked only
+          {/* Quick Segmented Buttons */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setFilterAnomalyType('All');
+                setBookmarkedOnly(false);
+                setCurrentPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-xl font-medium transition-colors shrink-0 ${
+                filterAnomalyType === 'All' && !bookmarkedOnly
+                  ? 'bg-[#8d3c26] text-white shadow-2xs font-semibold'
+                  : 'bg-[#fcf9f6] text-stone-700 hover:bg-[#f6eee8] border border-[#ebdcd3]'
+              }`}
+            >
+              All ({effectiveExpectedMissingAnomalies.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFilterAnomalyType('Missing');
+                setCurrentPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-xl font-medium transition-colors shrink-0 ${
+                filterAnomalyType === 'Missing'
+                  ? 'bg-[#8d3c26] text-white shadow-2xs font-semibold'
+                  : 'bg-[#fcf9f6] text-stone-700 hover:bg-[#f6eee8] border border-[#ebdcd3]'
+              }`}
+            >
+              Missing Only ({effectiveExpectedMissingAnomalies.filter((x) => x.anomalyType === 'Missing').length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFilterAnomalyType('Expected');
+                setCurrentPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-xl font-medium transition-colors shrink-0 ${
+                filterAnomalyType === 'Expected'
+                  ? 'bg-[#8d3c26] text-white shadow-2xs font-semibold'
+                  : 'bg-[#fcf9f6] text-stone-700 hover:bg-[#f6eee8] border border-[#ebdcd3]'
+              }`}
+            >
+              Expected Only ({effectiveExpectedMissingAnomalies.filter((x) => x.anomalyType === 'Expected').length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setBookmarkedOnly(!bookmarkedOnly);
+                setCurrentPage(1);
+              }}
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-medium transition-colors shrink-0 ${
+                bookmarkedOnly
+                  ? 'bg-[#8d3c26] text-white shadow-2xs font-semibold'
+                  : 'bg-[#fcf9f6] text-stone-700 hover:bg-[#f6eee8] border border-[#ebdcd3]'
+              }`}
+            >
+              <Star className={`w-3.5 h-3.5 ${bookmarkedOnly ? 'fill-current' : 'text-[#b25336]'}`} />
+              <span>Bookmarked</span>
+            </button>
+
+            <div className="h-5 w-px bg-[#ebdcd3] mx-1 shrink-0" />
+
+            <button
+              type="button"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors shrink-0 ${
+                showAdvancedFilters || activeFilterCount > 0
+                  ? 'bg-[#fbf0eb] text-[#8d3c26] border-[#ebdcd3]'
+                  : 'bg-white text-stone-700 hover:bg-[#fcf9f6] border-[#ebdcd3]'
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-[#8d3c26] text-white text-[10px] font-bold flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+              {showAdvancedFilters ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAllFilters}
+                className="text-stone-400 hover:text-stone-800 text-xs font-medium underline px-1.5 shrink-0"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Expandable Advanced Filters */}
+        {showAdvancedFilters && (
+          <div className="pt-3 border-t border-[#f0dfd5] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-[#fdfaf8] p-4 rounded-xl border border-[#ebdcd3]">
+            <div className="space-y-2.5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#8d3c26] block">
+                Type & Account
               </span>
-            </label>
+              <div>
+                <label className="text-[11px] font-medium text-stone-600 block mb-1">Transaction Type</label>
+                <select
+                  value={filterTxType}
+                  onChange={(e) => {
+                    setFilterTxType(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full p-2 bg-white border border-[#ebdcd3] rounded-xl text-stone-800 focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
+                >
+                  <option value="All">All Types</option>
+                  {TRANSACTION_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
 
-            <label className="flex items-center gap-1.5 text-slate-700 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={withMemoOnly}
-                onChange={(e) => {
-                  setWithMemoOnly(e.target.checked);
-                  setCurrentPage(1);
-                }}
-                className="rounded text-blue-600 focus:ring-blue-500"
-              />
-              <span>With memo</span>
-            </label>
-          </div>
-        </div>
+              <div>
+                <label className="text-[11px] font-medium text-stone-600 block mb-1">Account</label>
+                <select
+                  value={filterAccount}
+                  onChange={(e) => {
+                    setFilterAccount(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full p-2 bg-white border border-[#ebdcd3] rounded-xl text-stone-800 focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26] truncate"
+                >
+                  <option value="All">All Accounts</option>
+                  {uniqueAccounts.map((acc) => (
+                    <option key={acc} value={acc}>{acc}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-        {/* Dropdowns */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 text-xs">
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Tran Type</label>
-            <select
-              value={filterTxType}
-              onChange={(e) => {
-                setFilterTxType(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="All">All Types</option>
-              {TRANSACTION_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
+            <div className="space-y-2.5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#8d3c26] block">
+                Timing & Status
+              </span>
+              <div>
+                <label className="text-[11px] font-medium text-stone-600 block mb-1">Accounting Period</label>
+                <select
+                  value={filterPeriod}
+                  onChange={(e) => {
+                    setFilterPeriod(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full p-2 bg-white border border-[#ebdcd3] rounded-xl text-stone-800 focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
+                >
+                  <option value="All">All Periods</option>
+                  {ACCOUNTING_PERIODS.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
 
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Anomaly Type</label>
-            <select
-              value={filterAnomalyType}
-              onChange={(e) => {
-                setFilterAnomalyType(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="All">Expected & Missing</option>
-              <option value="Expected">Expected Only</option>
-              <option value="Missing">Missing Only</option>
-            </select>
-          </div>
+              <div>
+                <label className="text-[11px] font-medium text-stone-600 block mb-1">Review Status</label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => {
+                    setFilterStatus(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full p-2 bg-white border border-[#ebdcd3] rounded-xl text-stone-800 focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26]"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="Need Review">Need Review</option>
+                  <option value="Verified">Verified</option>
+                  <option value="Reopen">Reopen</option>
+                </select>
+              </div>
+            </div>
 
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Account</label>
-            <select
-              value={filterAccount}
-              onChange={(e) => {
-                setFilterAccount(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 truncate"
-            >
-              <option value="All">All Accounts</option>
-              {uniqueAccounts.map((acc) => (
-                <option key={acc} value={acc}>{acc}</option>
-              ))}
-            </select>
-          </div>
+            <div className="space-y-2.5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#8d3c26] block">
+                Entity & Subsidiary
+              </span>
+              <div>
+                <label className="text-[11px] font-medium text-stone-600 block mb-1">Entity</label>
+                <select
+                  value={filterEntity}
+                  onChange={(e) => {
+                    setFilterEntity(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full p-2 bg-white border border-[#ebdcd3] rounded-xl text-stone-800 focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26] truncate"
+                >
+                  <option value="All">All Entities</option>
+                  {uniqueEntities.map((ent) => (
+                    <option key={ent} value={ent}>{ent}</option>
+                  ))}
+                </select>
+              </div>
 
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Period</label>
-            <select
-              value={filterPeriod}
-              onChange={(e) => {
-                setFilterPeriod(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="All">All Periods</option>
-              {ACCOUNTING_PERIODS.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
+              <div>
+                <label className="text-[11px] font-medium text-stone-600 block mb-1">Subsidiary</label>
+                <select
+                  value={filterSubsidiary}
+                  onChange={(e) => {
+                    setFilterSubsidiary(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full p-2 bg-white border border-[#ebdcd3] rounded-xl text-stone-800 focus:outline-hidden focus:ring-2 focus:ring-[#8d3c26] truncate"
+                >
+                  <option value="All">All Subsidiaries</option>
+                  {SUBSIDIARIES.map((sub) => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Entity</label>
-            <select
-              value={filterEntity}
-              onChange={(e) => {
-                setFilterEntity(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 truncate"
-            >
-              <option value="All">All Entities</option>
-              {uniqueEntities.map((ent) => (
-                <option key={ent} value={ent}>{ent}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Status</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Need Review">Need Review</option>
-              <option value="Verified">Verified</option>
-              <option value="Reopen">Reopen</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Subsidiary</label>
-            <select
-              value={filterSubsidiary}
-              onChange={(e) => {
-                setFilterSubsidiary(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full p-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 truncate"
-            >
-              <option value="All">All Subsidiaries</option>
-              {SUBSIDIARIES.map((sub) => (
-                <option key={sub} value={sub}>{sub}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        )}
 
         {/* Bulk Actions */}
         {selectedIds.length > 0 && (
-          <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 bg-blue-50/70 p-2.5 rounded-lg text-xs">
-            <span className="font-semibold text-blue-900">
-              {selectedIds.length} anomalies selected
+          <div className="pt-2.5 border-t border-[#f0dfd5] flex flex-wrap items-center justify-between gap-2.5 bg-[#fbf3ef] p-3 rounded-xl text-xs">
+            <span className="font-semibold text-[#732918]">
+              {selectedIds.length} exceptions selected
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -349,7 +483,7 @@ export const ExpectedMissingTab: React.FC = () => {
                   bulkUpdateStatus('expected-missing', selectedIds, 'resolve');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-md font-semibold hover:bg-emerald-700 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-700 text-white rounded-lg font-semibold hover:bg-emerald-800 transition-colors shadow-2xs"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
                 Mark Resolved
@@ -360,9 +494,9 @@ export const ExpectedMissingTab: React.FC = () => {
                   bulkUpdateStatus('expected-missing', selectedIds, 'no-action');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-md font-semibold hover:bg-slate-100 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#ebdcd3] text-stone-700 rounded-lg font-semibold hover:bg-stone-50 transition-colors shadow-2xs"
               >
-                <ThumbsDown className="w-3.5 h-3.5 text-slate-500" />
+                <ThumbsDown className="w-3.5 h-3.5 text-stone-500" />
                 Not an Error
               </button>
               <button
@@ -371,7 +505,7 @@ export const ExpectedMissingTab: React.FC = () => {
                   bulkUpdateStatus('expected-missing', selectedIds, 'discard');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-300 text-rose-700 rounded-md font-semibold hover:bg-rose-100 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg font-semibold hover:bg-rose-100 transition-colors shadow-2xs"
               >
                 <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                 Remove Exceptions
@@ -382,7 +516,7 @@ export const ExpectedMissingTab: React.FC = () => {
                   bulkUpdateStatus('expected-missing', selectedIds, 'reopen');
                   setSelectedIds([]);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#8d3c26] text-white rounded-lg font-semibold hover:bg-[#732918] transition-colors shadow-2xs"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reopen
@@ -392,26 +526,25 @@ export const ExpectedMissingTab: React.FC = () => {
         )}
       </div>
 
-      {/* Table:
-          Transaction (link), Anomaly Type (Expected/Missing), Accounting Period, Expected Date, Impacted Amount, Entity (link), Subsidiary, Status, Action (Review) */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+      {/* Table */}
+      <div className="bg-white/95 border border-[#ebdcd3] rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-[11px] font-semibold">
+              <tr className="bg-[#fcf9f6] border-b border-[#ebdcd3] text-stone-600 text-[11px] font-semibold">
                 <th className="py-3 px-3 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
-                    className="rounded text-blue-600 focus:ring-blue-500"
+                    className="rounded text-[#8d3c26] focus:ring-[#8d3c26]"
                   />
                 </th>
-                <th className="py-3 px-2 w-8 text-center">★</th>
+                <th className="py-3 px-2 w-8 text-center text-stone-400">★</th>
                 <th className="py-3 px-3">Transaction / Ref</th>
                 <th className="py-3 px-3">Anomaly Type</th>
-                <th className="py-3 px-3">Account</th>
-                <th className="py-3 px-3">Accounting Period</th>
+                <th className="py-3 px-3">GL Account</th>
+                <th className="py-3 px-3">Period</th>
                 <th className="py-3 px-3">Expected Date</th>
                 <th className="py-3 px-3 text-right">Impacted Amount</th>
                 <th className="py-3 px-3">Entity</th>
@@ -420,10 +553,10 @@ export const ExpectedMissingTab: React.FC = () => {
                 <th className="py-3 px-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#f2e6de] text-stone-700">
               {paginatedList.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="py-12 text-center text-slate-400">
+                  <td colSpan={12} className="py-12 text-center text-stone-400 text-xs">
                     No expected/missing anomalies match current filters.
                   </td>
                 </tr>
@@ -431,89 +564,86 @@ export const ExpectedMissingTab: React.FC = () => {
                 paginatedList.map((item) => (
                   <tr
                     key={item.id}
-                    className={`hover:bg-slate-50/80 transition-colors ${
-                      selectedIds.includes(item.id) ? 'bg-blue-50/30' : ''
+                    className={`hover:bg-[#fcfaf8] transition-colors ${
+                      selectedIds.includes(item.id) ? 'bg-[#fbf4f0]' : ''
                     }`}
                   >
-                    <td className="py-2.5 px-3 text-center">
+                    <td className="py-3 px-3 text-center">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(item.id)}
                         onChange={() => toggleSelectOne(item.id)}
-                        className="rounded text-blue-600 focus:ring-blue-500"
+                        className="rounded text-[#8d3c26] focus:ring-[#8d3c26]"
                       />
                     </td>
-                    <td className="py-2.5 px-2 text-center">
+                    <td className="py-3 px-2 text-center">
                       <button
                         type="button"
                         onClick={() => toggleBookmark('expected-missing', item.id)}
-                        className={`p-1 rounded hover:bg-slate-100 ${
-                          item.isBookmarked ? 'text-amber-500' : 'text-slate-300 hover:text-slate-500'
+                        className={`p-1 rounded hover:bg-[#f6eee8] ${
+                          item.isBookmarked ? 'text-[#b25336]' : 'text-stone-300 hover:text-stone-600'
                         }`}
                       >
                         <Star className={`w-3.5 h-3.5 ${item.isBookmarked ? 'fill-current' : ''}`} />
                       </button>
                     </td>
-                    <td className="py-2.5 px-3 font-semibold">
+                    <td className="py-3 px-3 font-semibold">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] text-stone-500 bg-[#f6eee8] px-1.5 py-0.5 rounded border border-[#ebdcd3]">
                           {item.transactionType}
                         </span>
                         <button
+                          type="button"
                           onClick={() => openTransactionModal(item.tranId)}
-                          className="text-blue-600 hover:underline flex items-center gap-1"
+                          className="text-[#8d3c26] hover:underline flex items-center gap-1 font-bold"
                         >
                           {item.tranId}
                           <ExternalLink className="w-2.5 h-2.5" />
                         </button>
                       </div>
                     </td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                          item.anomalyType === 'Expected'
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                            : 'bg-amber-50 text-amber-800 border border-amber-200'
-                        }`}
-                      >
+                    <td className="py-3 px-3">
+                      <span className="font-semibold text-stone-800">
                         {item.anomalyType}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 truncate max-w-44" title={item.account || '6000 - Operating Expenses'}>
+                    <td className="py-3 px-3 font-mono text-[11px] text-stone-700 truncate max-w-44" title={item.account || '6000 - Operating Expenses'}>
                       {item.account || '6000 - Operating Expenses'}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-500">{item.accountingPeriod}</td>
-                    <td className="py-2.5 px-3 text-slate-700 font-mono text-[11px]">{item.expectedDate}</td>
-                    <td className="py-2.5 px-3 text-right font-medium text-slate-900">
+                    <td className="py-3 px-3 text-stone-500">{item.accountingPeriod}</td>
+                    <td className="py-3 px-3 text-stone-700 font-mono text-[11px] tabular-nums">{item.expectedDate}</td>
+                    <td className="py-3 px-3 text-right font-medium text-stone-900 font-mono tabular-nums">
                       ${item.impactedAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-3 px-3">
                       <button
+                        type="button"
                         onClick={() => openEntityModal(item.entity)}
-                        className="text-blue-600 hover:underline truncate max-w-36 block text-left"
+                        className="text-stone-800 hover:text-[#8d3c26] hover:underline truncate max-w-36 block text-left font-medium"
                       >
                         {item.entity}
                       </button>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-500 truncate max-w-28">{item.subsidiary}</td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                          item.status === 'Verified'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : item.status === 'Reopen'
-                            ? 'bg-indigo-50 text-indigo-700'
-                            : 'bg-amber-50 text-amber-700'
-                        }`}
-                      >
-                        {item.status}
-                      </span>
+                    <td className="py-3 px-3 text-stone-500 truncate max-w-28">{item.subsidiary}</td>
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 ${
+                            item.status === 'Verified'
+                              ? 'bg-emerald-600'
+                              : item.status === 'Reopen'
+                              ? 'bg-indigo-600'
+                              : 'bg-[#c06a1c]'
+                          }`}
+                        />
+                        <span className="font-medium text-stone-800">{item.status}</span>
+                      </div>
                     </td>
-                    <td className="py-2.5 px-3 text-right">
+                    <td className="py-3 px-3 text-right">
                       <button
                         type="button"
                         onClick={() => openDrawer('expected-missing', item)}
-                        className="px-2.5 py-1 text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                        className="px-3 py-1 text-[11px] font-semibold text-[#8d3c26] bg-[#fbf0eb] hover:bg-[#f6eee8] border border-[#ebdcd3] rounded-lg transition-colors shadow-2xs"
                       >
                         Review
                       </button>

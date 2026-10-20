@@ -13,6 +13,9 @@ import {
   Gauge,
   Activity,
   Lock,
+  Compass,
+  MessageSquare,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -28,6 +31,11 @@ export const Sidebar: React.FC = () => {
     currentUserRole,
     addToast,
     guardrailEvents,
+    activeScenario,
+    completedTaskIds,
+    guidedTasks,
+    setIsGuidedLearningHubOpen,
+    setIsFeedbackModalOpen,
   } = useAnomaly();
 
   const perms = getRolePermissions(currentUserRole);
@@ -309,16 +317,28 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer System Status Card */}
-      <div className="px-4">
-        <div className="p-3.5 bg-white/80 rounded-xl border border-[#ebdcd3] text-[11px] text-stone-600 space-y-1 shadow-2xs">
-          <div className="font-semibold text-stone-800 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-            Anomaly Engine Online
+      {/* Footer System Status & Research Suite */}
+      <div className="px-3 pt-2 border-t border-[#ebdcd3] space-y-2">
+        <button
+          type="button"
+          onClick={() => setIsGuidedLearningHubOpen(true)}
+          className="w-full flex items-center justify-between p-2 rounded-xl bg-white border border-[#ebdcd3] hover:bg-[#fbf7f4] transition-colors text-xs cursor-pointer shadow-2xs"
+        >
+          <div className="flex items-center gap-2 text-stone-700">
+            <Compass className="w-3.5 h-3.5 text-[#8d3c26]" />
+            <span className="font-semibold text-[11px]">Research Suite</span>
           </div>
-          <p className="text-[10px] text-stone-400 leading-tight">
-            Last continuous GL scan: Today 05:30 AM
-          </p>
+          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#8d3c26] text-white">
+            {completedTaskIds.length}/{guidedTasks.length}
+          </span>
+        </button>
+
+        <div className="flex items-center justify-between px-2 text-[10px] text-stone-400">
+          <span className="flex items-center gap-1.5 font-medium text-stone-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+            GL Engine Active
+          </span>
+          <span className="font-mono">SOX 404</span>
         </div>
       </div>
     </aside>

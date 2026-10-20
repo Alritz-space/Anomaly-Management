@@ -3,6 +3,7 @@ import { useAnomaly } from '../../context/AnomalyContext';
 import { CustomAnomaly, AnomalyRule, TransactionType, RuleStatus, RulePriority } from '../../types/anomaly';
 import { KpiCard } from '../common/KpiCard';
 import { Pagination } from '../common/Pagination';
+import { GuidedLearningCallout } from '../common/GuidedLearningCallout';
 import { getRolePermissions, getActionRestrictionReason } from '../../guardrails/rbac';
 import {
   Search,
@@ -167,15 +168,15 @@ export const CustomAnomaliesTab: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Sub-tab Switcher: Anomalies | Anomaly Rules */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-        <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+      <div className="flex items-center justify-between border-b border-[#ebdcd3] pb-2">
+        <div className="flex items-center gap-2 bg-[#fbf5f2] p-1 rounded-xl border border-[#ebdcd3]">
           <button
             type="button"
             onClick={() => setCustomSubTab('anomalies')}
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               customSubTab === 'anomalies'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             Custom Anomalies ({effectiveCustomAnomalies.length})
@@ -185,8 +186,8 @@ export const CustomAnomaliesTab: React.FC = () => {
             onClick={() => setCustomSubTab('rules')}
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               customSubTab === 'rules'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             Anomaly Rules ({rules.length})
@@ -198,7 +199,7 @@ export const CustomAnomaliesTab: React.FC = () => {
             type="button"
             disabled={!perms.canCreateRules}
             onClick={() => openCreateRuleModal()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#8d3c26] hover:bg-[#782e1d] disabled:bg-stone-300 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-colors shadow-2xs"
             title={!perms.canCreateRules ? getActionRestrictionReason('create_rule', currentUserRole) : 'Create Anomaly Rule'}
           >
             {!perms.canCreateRules ? <Lock className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
@@ -207,45 +208,69 @@ export const CustomAnomaliesTab: React.FC = () => {
         )}
       </div>
 
+      {/* Guided Learning Callout for Deterministic Controls vs AI Models */}
+      <GuidedLearningCallout
+        badge="Deterministic Governance Framework"
+        title="Custom Rule Guardrails vs Machine Learning Detection"
+        description="While statistical models identify behavioral and seasonal outliers, Custom Rules enforce hard deterministic compliance boundaries (e.g. strict threshold caps on unapproved consulting expenses, mandatory second approvals for high-value foreign transfers)."
+        complianceNote="SOX 404 & COSO Framework: Configured rules evaluate 100% of journal entries and maintain immutable modification history."
+        storageKey="custom_rules_guidance"
+      />
+
       {/* SUB-TAB 1: ANOMALIES VIEW */}
       {customSubTab === 'anomalies' && (
-        <div className="space-y-4">
-          {/* 4 KPI Cards Required by Prompt:
-              Open Anomalies, Resolved, No Action, Active Rules */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <KpiCard
-              label="Open Anomalies"
-              value={openCount}
-              badge="Pending Review"
-              badgeColor="amber"
-              icon={<AlertTriangle className="w-5 h-5 text-amber-600" />}
-            />
-            <KpiCard
-              label="Resolved"
-              value={resolvedCount}
-              badge="Compliant"
-              badgeColor="emerald"
-              icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
-            />
-            <KpiCard
-              label="No Action"
-              value={noActionCount}
-              badge="Accepted"
-              badgeColor="slate"
-              icon={<MinusCircle className="w-5 h-5 text-slate-500" />}
-            />
-            <KpiCard
-              label="Active Rules"
-              value={activeRulesCount}
-              subValue={`of ${rules.length} configured`}
-              badge="Live Scanning"
-              badgeColor="blue"
-              icon={<Cpu className="w-5 h-5 text-blue-600" />}
-            />
+        <div className="space-y-3.5">
+          {/* Sleek Top Metrics Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3 shadow-2xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                Open Anomalies
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl font-bold text-stone-900">{openCount}</span>
+                <span className="text-[10px] font-semibold text-[#8d3c26] bg-[#fbf0eb] px-1.5 py-0.2 rounded">
+                  Pending
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3 shadow-2xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                Resolved
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl font-bold text-emerald-700">{resolvedCount}</span>
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
+                  Compliant
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3 shadow-2xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                Not an Error
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl font-bold text-stone-700">{noActionCount}</span>
+                <span className="text-[10px] font-medium text-stone-500 bg-stone-100 px-1.5 py-0.2 rounded">
+                  Accepted
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white/95 border border-[#ebdcd3] rounded-xl p-3 shadow-2xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                Active Rules
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl font-bold text-[#8d3c26]">{activeRulesCount}</span>
+                <span className="text-[10px] text-stone-400">of {rules.length} configured</span>
+              </div>
+            </div>
           </div>
 
           {/* Filter Bar */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-2xs">
+          <div className="bg-white/95 border border-[#ebdcd3] rounded-2xl p-4.5 space-y-3.5 shadow-2xs">
             <div className="flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-96">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />

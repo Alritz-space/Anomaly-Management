@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAnomaly } from '../../context/AnomalyContext';
-import { KpiCard } from '../common/KpiCard';
 import { TransactionAnomaliesTab } from '../tabs/TransactionAnomaliesTab';
 import { ExpectedMissingTab } from '../tabs/ExpectedMissingTab';
 import { InventoryAnomaliesTab } from '../tabs/InventoryAnomaliesTab';
@@ -10,7 +9,7 @@ import {
   Clock,
   Boxes,
   Cpu,
-  Info,
+  Layers,
 } from 'lucide-react';
 
 export const AnomalyDashboardPage: React.FC = () => {
@@ -24,7 +23,7 @@ export const AnomalyDashboardPage: React.FC = () => {
     rules,
   } = useAnomaly();
 
-  // Counts for the 4 Summary Cards Acting as Tabs:
+  // Counts for the 4 Domains
   const txCount = effectiveTransactionAnomalies.length;
   const txPending = effectiveTransactionAnomalies.filter(
     (x) => x.status === 'Need Review' || x.status === 'Reopen'
@@ -45,80 +44,88 @@ export const AnomalyDashboardPage: React.FC = () => {
     (x) => x.status === 'Need Review' || x.status === 'Reopen'
   ).length;
 
+  const domainTabs = [
+    {
+      id: 'transactions' as const,
+      label: 'Transaction Outliers',
+      count: txCount,
+      pending: txPending,
+      icon: <AlertTriangle className="w-3.5 h-3.5 text-[#8d3c26]" />,
+    },
+    {
+      id: 'expected-missing' as const,
+      label: 'Expected / Missing',
+      count: expMissingCount,
+      pending: expMissingPending,
+      icon: <Clock className="w-3.5 h-3.5 text-[#8d3c26]" />,
+    },
+    {
+      id: 'inventory' as const,
+      label: 'Inventory Anomalies',
+      count: invCount,
+      pending: invPending,
+      icon: <Boxes className="w-3.5 h-3.5 text-[#8d3c26]" />,
+    },
+    {
+      id: 'custom' as const,
+      label: 'Custom Rules & Outliers',
+      count: customRuleCount,
+      pending: customAnomPending,
+      icon: <Cpu className="w-3.5 h-3.5 text-[#8d3c26]" />,
+    },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Title & How-to-use Guidance Header */}
-      <div className="bg-white/95 rounded-2xl border border-[#ebdcd3] p-6 shadow-2xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold tracking-tight text-stone-900">
-                Anomaly Dashboard
+    <div className="max-w-7xl mx-auto space-y-4">
+      {/* Sleek, Clean Page Header & Segmented Domain Switcher */}
+      <div className="bg-white/95 rounded-xl border border-[#ebdcd3] px-5 py-3.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-stone-900">
+                Anomaly Intelligence Dashboard
               </h1>
-              <span className="text-xs text-stone-400 font-normal">·</span>
-              <span className="text-xs font-medium text-[#8d3c26]">Continuous Financial Intelligence</span>
+              <span className="text-stone-300">·</span>
+              <span className="text-[11px] font-semibold text-[#8d3c26] bg-[#fbf0eb] px-2 py-0.5 rounded-md border border-[#ebdcd3]">
+                Oct 2026 Close
+              </span>
             </div>
-            <p className="text-xs text-stone-600 max-w-3xl leading-relaxed">
-              Review flagged general ledger outliers and cycle variances before fiscal period close. Use the sensitivity slider to focus on high-impact transactions, filter by entity or account, and inspect details in the drawer.
+            <p className="text-[11px] text-stone-500 mt-0.5">
+              Continuous audit controls across general ledger transactions, recurring disbursements, and inventory.
             </p>
           </div>
-
-          <div className="flex items-center gap-2 text-xs text-stone-600 bg-[#fbf5f2] px-3.5 py-2 rounded-xl border border-[#ebdcd3] shrink-0 self-start md:self-auto">
-            <Info className="w-4 h-4 text-[#8d3c26] shrink-0" />
-            <span>Select a domain card below to switch audit view</span>
-          </div>
         </div>
-      </div>
 
-      {/* 4 Summary Cards That Act as Domain Tabs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          label="Transaction Outliers"
-          value={txCount}
-          subValue={`${txPending} pending review`}
-          badge={txPending > 0 ? `${txPending} Action Required` : 'Verified'}
-          badgeColor={txPending > 0 ? 'redwood' : 'emerald'}
-          icon={<AlertTriangle className="w-5 h-5 text-[#8d3c26]" />}
-          isActive={dashboardTab === 'transactions'}
-          onClick={() => setDashboardTab('transactions')}
-          description="Unusual amounts, accounts & duplicate batches"
-        />
-
-        <KpiCard
-          label="Expected / Missing"
-          value={expMissingCount}
-          subValue={`${expMissingPending} pending review`}
-          badge="Cycle Variance"
-          badgeColor="redwood"
-          icon={<Clock className="w-5 h-5 text-[#8d3c26]" />}
-          isActive={dashboardTab === 'expected-missing'}
-          onClick={() => setDashboardTab('expected-missing')}
-          description="Predicted and omitted recurring entries"
-        />
-
-        <KpiCard
-          label="Inventory Anomalies"
-          value={invCount}
-          subValue={`${invPending} pending review`}
-          badge="Stock Risks"
-          badgeColor="amber"
-          icon={<Boxes className="w-5 h-5 text-[#8d3c26]" />}
-          isActive={dashboardTab === 'inventory'}
-          onClick={() => setDashboardTab('inventory')}
-          description="Projected stockouts & safety buffer risks"
-        />
-
-        <KpiCard
-          label="Custom Anomalies"
-          value={customRuleCount}
-          subValue={`${customAnomPending} matching items`}
-          badge="Audit Rules"
-          badgeColor="redwood"
-          icon={<Cpu className="w-5 h-5 text-[#8d3c26]" />}
-          isActive={dashboardTab === 'custom'}
-          onClick={() => setDashboardTab('custom')}
-          description="User-defined controls & SOX audit logic"
-        />
+        {/* Clean Segmented Domain Switcher */}
+        <div className="flex items-center gap-1 bg-[#fbf5f2] p-1 rounded-xl border border-[#ebdcd3] overflow-x-auto text-xs">
+          {domainTabs.map((tab) => {
+            const isActive = dashboardTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setDashboardTab(tab.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 cursor-pointer ${
+                  isActive
+                    ? 'bg-white text-stone-900 shadow-2xs font-semibold'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-white/50'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                    isActive
+                      ? 'bg-[#8d3c26] text-white'
+                      : 'bg-[#ebdcd3] text-stone-700'
+                  }`}
+                >
+                  {tab.pending > 0 ? tab.pending : tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Active Tab Panel */}
